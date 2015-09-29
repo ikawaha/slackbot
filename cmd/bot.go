@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 
 	slackbot "github.com/ikawaha/slackbot"
 )
@@ -23,20 +22,17 @@ func main() {
 	}
 	fmt.Println("^C exits")
 
-	id := "<@" + bot.ID + ">"
 	for {
 		m, err := bot.GetMessage()
 		if err != nil {
 			log.Fatal(err)
 		}
-		log.Printf("%+v\n", m)
-		if m.Type == "message" && strings.HasPrefix(m.Text, id) {
-			msg := strings.TrimPrefix(m.Text, id)
-			if strings.HasPrefix(msg, ": ") {
-				msg = strings.TrimPrefix(msg, ": ")
-			}
-			m.Text = msg
-			go bot.PostMessage(m)
+		log.Printf("msg:%+v\n", m)
+		if bot.ID == m.UserID() && m.Type == "message" {
+			m.Text = m.TextBody()
+			go func(msg slackbot.Message) {
+				bot.PostMessage(msg)
+			}(m)
 		}
 	}
 }
