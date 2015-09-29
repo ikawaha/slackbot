@@ -5,12 +5,17 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"regexp"
 	"sync/atomic"
 
 	"golang.org/x/net/websocket"
 )
 
-// Bot represents slack bot.
+var (
+	reMsg = regexp.MustCompile(`<@(.+)>(?:: )(.*)`)
+)
+
+// Bot represents a slack bot.
 type Bot struct {
 	ID      string
 	Users   map[string]string
@@ -21,7 +26,7 @@ type Bot struct {
 type connectResponse struct {
 	OK    bool                        `json:"ok"`
 	Error string                      `json:"error"`
-	Url   string                      `json:"url"`
+	URL   string                      `json:"url"`
 	Self  struct{ ID string }         `json:"self"`
 	Users []struct{ ID, Name string } `json:"users"`
 }
@@ -41,7 +46,7 @@ func New(token string) (*Bot, error) {
 	}
 
 	// get realtime connection
-	if e := bot.dial(resp.Url); e != nil {
+	if e := bot.dial(resp.URL); e != nil {
 		return nil, e
 	}
 
@@ -78,8 +83,8 @@ func (b Bot) connect(token string) (*connectResponse, error) {
 	return &body, nil
 }
 
-func (b *Bot) dial(url_ string) error {
-	ws, err := websocket.Dial(url_, "", "https://api.slack.com/")
+func (b *Bot) dial(url string) error {
+	ws, err := websocket.Dial(url, "", "https://api.slack.com/")
 	if err != nil {
 		return fmt.Errorf("dial error, %v", err)
 	}
@@ -89,10 +94,28 @@ func (b *Bot) dial(url_ string) error {
 
 // Message represents a message.
 type Message struct {
-	Id      uint64 `json:"id"`
+	ID      uint64 `json:"id"`
 	Type    string `json:"type"`
 	Channel string `json:"channel"`
 	Text    string `json:"text"`
+}
+
+// UserID returns user id of the message.
+func (m Message) UserID() string {
+	matches := reMsg.FindStringSubmatch(m.Text)
+	if len(matches) == 3 {
+		return matches[1]
+	}
+	return ""
+}
+
+// TextBody returns the body of the message.
+func (m Message) TextBody() string {
+	matches := reMsg.FindStringSubmatch(m.Text)
+	if len(matches) == 3 {
+		return matches[2]
+	}
+	return ""
 }
 
 // GetMessage receives a message from the slack channel.
@@ -104,7 +127,7 @@ func (b Bot) GetMessage() (Message, error) {
 
 // PostMessage sends a message to the slack channel.
 func (b *Bot) PostMessage(m Message) error {
-	m.Id = atomic.AddUint64(&b.counter, 1)
+	m.ID = atomic.AddUint64(&b.counter, 1)
 	return websocket.JSON.Send(b.socket, m)
 }
 
