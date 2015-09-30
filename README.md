@@ -29,9 +29,9 @@ for {
     }
     if bot.ID == msg.MentionID() && msg.Type == "message" && msg.SubType == "" {
         go func(m slackbot.Message) {
-	   m.Text = m.TextBody()
-	   bot.PostMessage(m)
-	}(msg)
+           m.Text = m.TextBody()
+           bot.PostMessage(m)
+        }(msg)
     }
 }
 ```
