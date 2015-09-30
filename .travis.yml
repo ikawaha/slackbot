@@ -14,7 +14,7 @@ before_install:
 install:
   - go get golang.org/x/net/websocket
   - go get github.com/mattn/go-haiku
-  - go get github.com/ikawaha/dajarep # github.com/kurehajime/dajarep
+  - go get github.com/kurehajime/dajarep
   - go get github.com/ikawaha/kagome/...
 
 script:
