@@ -48,13 +48,13 @@ func main() {
 				return
 			}
 			var tmp []string
-			for _, h := range haikus {
+			for _, h := range hs {
 				tmp = append(tmp, fmt.Sprintf("```%v```", h))
 			}
 			m.Text = strings.Join(tmp, "\n")
 			m.Text += " 575だ"
 			time.Sleep(botResponseSleepTime)
 			bot.PostMessage(m)
-		}(msg, hs)
+		}(msg)
 	}
 }
