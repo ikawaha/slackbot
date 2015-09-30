@@ -1,4 +1,4 @@
-package slack
+package slackbot
 
 import (
 	"encoding/json"
@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	reMsg = regexp.MustCompile(`<@(.+)>(?:: )(.*)`)
+	reMsg = regexp.MustCompile(`(?:<@(.+)>)?(?::?\s+)?(.*)`)
 )
 
 // Bot represents a slack bot.
@@ -92,30 +92,10 @@ func (b *Bot) dial(url string) error {
 	return nil
 }
 
-// Message represents a message.
-type Message struct {
-	ID      uint64 `json:"id"`
-	Type    string `json:"type"`
-	Channel string `json:"channel"`
-	Text    string `json:"text"`
-}
-
-// UserID returns user id of the message.
-func (m Message) UserID() string {
-	matches := reMsg.FindStringSubmatch(m.Text)
-	if len(matches) == 3 {
-		return matches[1]
-	}
-	return ""
-}
-
-// TextBody returns the body of the message.
-func (m Message) TextBody() string {
-	matches := reMsg.FindStringSubmatch(m.Text)
-	if len(matches) == 3 {
-		return matches[2]
-	}
-	return ""
+// UserName returns a slack username from the user id.
+func (b Bot) UserName(uid string) string {
+	name, _ := b.Users[uid]
+	return name
 }
 
 // GetMessage receives a message from the slack channel.
@@ -134,4 +114,32 @@ func (b *Bot) PostMessage(m Message) error {
 // Close implements the io.Closer interface.
 func (b *Bot) Close() error {
 	return b.socket.Close()
+}
+
+// Message represents a message.
+type Message struct {
+	ID      uint64 `json:"id"`
+	Type    string `json:"type"`
+	SubType string `json:"subtype"`
+	Channel string `json:"channel"`
+	UserID  string `json:"user"`
+	Text    string `json:"text"`
+}
+
+// TextBody returns the body of the message.
+func (m Message) TextBody() string {
+	matches := reMsg.FindStringSubmatch(m.Text)
+	if len(matches) == 3 {
+		return matches[2]
+	}
+	return ""
+}
+
+// MentionID returns the mention id of this message.
+func (m Message) MentionID() string {
+	matches := reMsg.FindStringSubmatch(m.Text)
+	if len(matches) == 3 {
+		return matches[1]
+	}
+	return ""
 }
