@@ -1,20 +1,20 @@
 # slackbot
 
-Tiny slack bot lib.
+Tiny slack bot client.
 
 # Prepare
 
 Please get the token for your slack bot.
 https://[YOURTEAM].slack.com/services/new/bot
 
-see.https://api.slack.com/
+see. https://api.slack.com/
 
 # Interface
 
 Echo bot sample.
 
 ```
-bot, err := slackbot.New(token) // set token of your bot!
+bot, err := slackbot.New(token) // set your bot token!
 if err != nil {
     log.Fatal(err)
 }
