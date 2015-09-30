@@ -12,6 +12,9 @@ before_install:
   - go get golang.org/x/tools/cmd/cover
 
 install:
+  - go get github.com/mattn/go-haiku
+  - go get github.com/ikawaha/dajarep # github.com/kurehajime/dajarep
+  - go get github.com/ikawaha/kagome
 
 script:
   - go test ./...
