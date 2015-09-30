@@ -1,0 +1,22 @@
+language: go
+
+go:
+  - tip
+
+sudo: false
+
+before_install:
+  - pip install --user codecov
+  - go get github.com/axw/gocov/gocov
+  - go get github.com/mattn/goveralls
+  - go get golang.org/x/tools/cmd/cover
+
+install:
+
+script:
+  - go test ./...
+  - /bin/sh ./go-coverall.sh
+
+after_success:
+  - codecov
+
