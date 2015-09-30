@@ -6,8 +6,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/kurehajime/dajarep" //awesome!
-
+	//"github.com/kurehajime/dajarep" //awesome!
+	"github.com/ikawaha/dajarep"
 	"github.com/ikawaha/slackbot"
 )
 
