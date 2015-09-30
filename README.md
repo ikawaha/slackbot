@@ -45,14 +45,14 @@ Samples:
 |dajare|cmd/dajarebot.go| Passive      |
 |ja-morph|cmd/kagomebot.go| Mention your bot|
 
-# Lisence
-
-MIT
-
 # Awesome
 
 * github.com/mattn/go-haiku
 * github.com/kurehajime/dajarep
+
+# Lisence
+
+MIT
 
 # Author
 
