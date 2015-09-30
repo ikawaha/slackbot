@@ -5,7 +5,8 @@ Tiny slack bot client.
 # Prepare
 
 Please get the token for your slack bot.
-https://[YOURTEAM].slack.com/services/new/bot
+
+`https://[YOURTEAM].slack.com/services/new/bot`
 
 see. https://api.slack.com/
 
