@@ -4,10 +4,6 @@ import (
 	"testing"
 )
 
-const (
-	slackAPIPath = "/api/rtm.start"
-)
-
 func TestBotUserNameEmpty(t *testing.T) {
 	b := Bot{Users: map[string]string{}}
 	if n := b.UserName(""); n != "" {
