@@ -20,7 +20,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	bot.Close()
+	defer bot.Close()
 	fmt.Println("^C exits")
 
 	for {
