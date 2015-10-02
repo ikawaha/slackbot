@@ -19,7 +19,7 @@ bot, err := slackbot.New(token) // set your bot token!
 if err != nil {
     log.Fatal(err)
 }
-bot.Close()
+defer bot.Close()
 fmt.Println("^C exits")
 
 for {
