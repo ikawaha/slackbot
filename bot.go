@@ -18,8 +18,10 @@ var (
 // Bot represents a slack bot.
 type Bot struct {
 	ID       string
+	Name     string
 	Users    map[string]string
 	Channels map[string]string
+	Ims      map[string]string
 	socket   *websocket.Conn
 	counter  uint64
 }
@@ -28,12 +30,16 @@ type connectResponse struct {
 	OK       bool                        `json:"ok"`
 	Error    string                      `json:"error"`
 	URL      string                      `json:"url"`
-	Self     struct{ ID string }         `json:"self"`
+	Self     struct{ ID, Name string }   `json:"self"`
 	Users    []struct{ ID, Name string } `json:"users"`
 	Channels []struct {
 		ID, Name string
 		IsMember bool `json:"is_member"`
 	} `json:"channels"`
+	Ims []struct {
+		ID     string
+		UserID string `json:"user"`
+	} `json:"ims"`
 }
 
 // New creates a slack bot from API token.
@@ -42,6 +48,7 @@ func New(token string) (*Bot, error) {
 	bot := Bot{
 		Users:    map[string]string{},
 		Channels: map[string]string{},
+		Ims:      map[string]string{},
 	}
 
 	// access slack api
@@ -60,6 +67,7 @@ func New(token string) (*Bot, error) {
 
 	// save properties
 	bot.ID = resp.Self.ID
+	bot.Name = resp.Self.Name
 	for _, u := range resp.Users {
 		bot.Users[u.ID] = u.Name
 	}
@@ -67,6 +75,9 @@ func New(token string) (*Bot, error) {
 		if c.IsMember {
 			bot.Channels[c.ID] = c.Name
 		}
+	}
+	for _, im := range resp.Ims {
+		bot.Ims[im.ID] = im.UserID
 	}
 	return &bot, nil
 }
