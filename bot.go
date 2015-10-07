@@ -7,8 +7,17 @@ import (
 	"net/url"
 	"regexp"
 	"sync/atomic"
+	"time"
 
 	"golang.org/x/net/websocket"
+)
+
+const (
+	EventTypeMessage = "message"
+	EventTypePing    = "ping"
+	EventTypePong    = "pong"
+
+	healthcheckRate = 5
 )
 
 var (
@@ -24,6 +33,7 @@ type Bot struct {
 	Ims      map[string]string
 	socket   *websocket.Conn
 	counter  uint64
+	latest   atomic.Value // latest pong reply time
 }
 
 type connectResponse struct {
@@ -115,6 +125,41 @@ func (b *Bot) dial(url string) error {
 	return nil
 }
 
+// Heartbeat sends an error to the channel if slack connection is failed.
+func (b *Bot) Heartbeat(interval, timeout time.Duration) <-chan error {
+	b.latest.Store(time.Now())
+	ch := make(chan error, 1)
+	t := time.Ticker(interval)
+	go func() {
+		defer t.Stop()
+		var i int
+		for {
+			select {
+			case <-t.C:
+				if e := b.PostMessage(Message{Type: EventTypePing}); e != nil {
+					ch <- fmt.Errorf("heartbeat ping error, %v", e)
+					return
+				}
+				if i = (i + 1) / healthcheckRate; i != 0 {
+					continue
+				}
+				time.Sleep(3 * time.Second)
+				latest, ok := b.latest.Load().(time.Time)
+				if !ok {
+					ch <- fmt.Errorf("heartbeat registration error")
+					return
+				}
+				d := time.Now().Sub(latest)
+				if d > timeout {
+					ch <- fmt.Errorf("timeout %v > $v", d, timeout)
+					return
+				}
+			}
+		}
+	}()
+	return ch
+}
+
 // UserName returns a slack username from the user id.
 func (b Bot) UserName(uid string) string {
 	name, _ := b.Users[uid]
@@ -122,10 +167,15 @@ func (b Bot) UserName(uid string) string {
 }
 
 // GetMessage receives a message from the slack channel.
-func (b Bot) GetMessage() (Message, error) {
+func (b *Bot) GetMessage() (Message, error) {
 	var msg Message
-	err := websocket.JSON.Receive(b.socket, &msg)
-	return msg, err
+	if e := websocket.JSON.Receive(b.socket, &msg); e != nil {
+		return msg, e
+	}
+	if msg.Type == EventTypePong {
+		b.latest.Store(time.Now())
+	}
+	return msg, nil
 }
 
 // PostMessage sends a message to the slack channel.
