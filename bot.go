@@ -52,7 +52,7 @@ func New(token string) (*Bot, error) {
 	}
 
 	// access slack api
-	resp, err := bot.connect(token)
+	resp, err := bot.rtmStart(token)
 	if err != nil {
 		return nil, fmt.Errorf("api connection error, %v", err)
 	}
@@ -82,7 +82,7 @@ func New(token string) (*Bot, error) {
 	return &bot, nil
 }
 
-func (b Bot) connect(token string) (*connectResponse, error) {
+func (b Bot) rtmStart(token string) (*connectResponse, error) {
 	q := url.Values{}
 	q.Set("token", token)
 	u := &url.URL{
