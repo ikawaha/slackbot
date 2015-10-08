@@ -129,7 +129,7 @@ func (b *Bot) dial(url string) error {
 func (b *Bot) Heartbeat(interval, timeout time.Duration) <-chan error {
 	b.latest.Store(time.Now())
 	ch := make(chan error, 1)
-	t := time.Ticker(interval)
+	t := time.NewTicker(interval)
 	go func() {
 		defer t.Stop()
 		var i int
