@@ -14,8 +14,21 @@ see. https://api.slack.com/
 
 Echo bot sample.
 
-```
-bot, err := slackbot.New(token) // set your bot token!
+```Go
+// your bot
+type Bot struct {
+	*slackbot.Client
+}
+
+func NewBot(token string) (*Bot, error) {
+	c, err := slackbot.New(token)
+	if err != nil {
+		return nil, err
+	}
+	return &Bot{Client: c}, err
+}
+
+bot, err := NewBot(token) // set your bot token!
 if err != nil {
     log.Fatal(err)
 }
@@ -34,26 +47,9 @@ for {
         }(msg)
     }
 }
+
 ```
-
-Samples:
-
-|Bot |Src            |Usage            |
-|:---|:---           |:---             |
-|echo|cmd/echobot.go | Mention your bot|
-|haiku|cmd/haikubot.go| Passive        |
-|dajare|cmd/dajarebot.go| Passive      |
-|ja-morph|cmd/kagomebot.go| Mention your bot|
-
-# Awesome
-
-* github.com/mattn/go-haiku
-* github.com/kurehajime/dajarep
 
 # Lisence
 
 MIT
-
-# Author
-
-ikawaha
