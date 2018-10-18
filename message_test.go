@@ -4,27 +4,8 @@ import (
 	"testing"
 )
 
-func TestBotUserNameEmpty(t *testing.T) {
-	b := Bot{Users: map[string]string{}}
-	if n := b.UserName(""); n != "" {
-		t.Errorf("got %v, expected empty", n)
-	}
-}
-
-func TestBotUserName(t *testing.T) {
-	m := map[string]string{
-		"U03CP354N": "foo",
-		"U02J1PU37": "baa",
-	}
-	b := Bot{Users: m}
-	for id, user := range m {
-		if u := b.UserName(id); u != user {
-			t.Errorf("got %v, expected empty", u, user)
-		}
-	}
-}
 func TestMessageTextBody(t *testing.T) {
-	s := map[string]string{
+	testdata := map[string]string{
 		"<@U0ATYM9UZ1>:aaaa":       ":aaaa",
 		"<@U0ATYM9UZ2>: bbbb":      "bbbb",
 		"<@U0ATYM9UZ2>:      cccc": "cccc",
@@ -35,17 +16,16 @@ func TestMessageTextBody(t *testing.T) {
 		"":                         "",
 	}
 	var m Message
-	for txt, ans := range s {
-		m.Text = txt
-		b := m.TextBody()
-		if b != ans {
-			t.Errorf("input: %v, got %v, expected %v", txt, b, ans)
+	for input, expected := range testdata {
+		m.Text = input
+		if got := m.TextBody(); got != expected{
+			t.Errorf("input: %v, got %v, expected %v", input, got, expected)
 		}
 	}
 }
 
 func TestMessageMentionID(t *testing.T) {
-	s := map[string]string{
+	testdata := map[string]string{
 		"<@U0ATYM9UZ1>:aaaa":       "U0ATYM9UZ1",
 		"<@U0ATYM9UZ2>: bbbb":      "U0ATYM9UZ2",
 		"<@U0ATYM9UZ3>:      cccc": "U0ATYM9UZ3",
@@ -57,11 +37,10 @@ func TestMessageMentionID(t *testing.T) {
 		"":                         "",
 	}
 	var m Message
-	for txt, ans := range s {
-		m.Text = txt
-		id := m.MentionID()
-		if id != ans {
-			t.Errorf("input: %v, got %v, expected %v", txt, id, ans)
+	for input, expected := range testdata {
+		m.Text = input
+		if got := m.MentionID();got != expected {
+			t.Errorf("input: %v, got %v, expected %v", input, got, expected)
 		}
 	}
 }

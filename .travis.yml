@@ -10,17 +10,8 @@ before_install:
   - go get github.com/axw/gocov/gocov
   - go get github.com/mattn/goveralls
   - go get golang.org/x/tools/cmd/cover
-
-install:
   - go get golang.org/x/net/websocket
-  - go get github.com/mattn/go-haiku
-  - go get github.com/kurehajime/dajarep
-  - go get github.com/ikawaha/kagome/...
 
 script:
   - go test ./...
-  - /bin/sh ./go-coverall.sh
-
-after_success:
-  - codecov
 
