@@ -26,7 +26,7 @@ const (
 )
 
 var (
-	reMsg = regexp.MustCompile(`(?:<@(.+)>)?(?::?\s+)?(.*)`)
+	reMsg = regexp.MustCompile(`(?:<(?:.+|)?@(.+)>)?(?::?\s+)?((?s:.*))`)
 )
 
 // Client represents a slack client.
