@@ -153,8 +153,8 @@ func (c Client) UserName(uid string) string {
 }
 
 // GetMessage receives a message from the slack channel.
-func (c Client) GetMessage() (Message, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
+func (c Client) GetMessage(ctx context.Context) (Message, error) {
+	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
 	ch := make(chan error, 1)
 
