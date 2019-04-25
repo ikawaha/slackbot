@@ -20,7 +20,6 @@ import (
 )
 
 const (
-	EventTypeMessage = "message"
 	EventTypePing    = "ping"
 
 	DefaultTimeout = time.Minute
@@ -178,7 +177,6 @@ func (c Client) GetMessage(ctx context.Context) (Message, error) {
 	case <-ctx.Done():
 		return msg, fmt.Errorf("connection lost timeout")
 	}
-	return msg, nil
 }
 
 var (
