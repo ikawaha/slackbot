@@ -244,6 +244,9 @@ func (c Client) UploadImage(channels []string, title, fileName, fileType, commen
 	}
 
 	req, err := http.NewRequest("POST", "https://slack.com/api/files.upload", &buf)
+	if err != nil{
+		return fmt.Errorf("slack files.uplad new request error, %v", err)
+	}
 	req.Header.Set("Content-Type", mw.FormDataContentType())
 	cl := &http.Client{Timeout: 10 * time.Second}
 	resp, err := cl.Do(req)
