@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"net/url"
@@ -23,10 +24,6 @@ const (
 	EventTypePing    = "ping"
 
 	DefaultTimeout = time.Minute
-)
-
-var (
-	reMsg = regexp.MustCompile(`(?:<(?:.+|)?@(.+)>)?(?::?\s+)?((?s:.*))`)
 )
 
 // Client represents a slack client.
@@ -164,7 +161,9 @@ func (c Client) GetMessage(ctx context.Context) (Message, error) {
 		select {
 		case <-ctx.Done():
 		case <-time.After(waiting):
-			websocket.JSON.Send(c.socket, &Message{Type: EventTypePing, Time: time.Now().Unix()})
+			if err :=websocket.JSON.Send(c.socket, &Message{Type: EventTypePing, Time: time.Now().Unix()}); err !=nil{
+				log.Printf("ping error, %v", err)
+			}
 		}
 	}(ctx, c.timeout-time.Second)
 
@@ -180,6 +179,32 @@ func (c Client) GetMessage(ctx context.Context) (Message, error) {
 		return msg, fmt.Errorf("connection lost timeout")
 	}
 	return msg, nil
+}
+
+var (
+	metaTag     = regexp.MustCompile(`<.*?>`)
+	parentheses = strings.NewReplacer("&lt;","<","&gt;",">")
+)
+
+// PlainMessageText resolves meta tags of the message text and return it.
+func (c Client) PlainMessageText(msg string) string {
+	txt := metaTag.ReplaceAllStringFunc(msg, func(s string) string {
+		var id string
+		for i :=0; i < len(s)-2; i++ {
+			if s[i] == '@' {
+				id = s[i+1:len(s)-1]
+				break
+			}
+		}
+		if v, ok := c.Users[id]; ok {
+			return "@"+v
+		}
+		if id !=""{
+			return "@"+id
+		}
+		return s
+	})
+	return parentheses.Replace(txt)
 }
 
 // PostMessage sends a message to the slack channel.
