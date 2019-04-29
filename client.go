@@ -36,7 +36,7 @@ type Client struct {
 	socket   *websocket.Conn
 	counter  uint64
 	token    string
-	timeout time.Duration
+	timeout  time.Duration
 }
 
 type connectResponse struct {
@@ -99,7 +99,7 @@ func New(token string) (*Client, error) {
 
 // SetTimeout sets client timeout.
 // If you try to set a timeout less than DefaultTimeout, DefaultTimeout is set.
-func (c *Client)SetTimeout(timeout time.Duration) {
+func (c *Client) SetTimeout(timeout time.Duration) {
 	if timeout < time.Minute {
 		c.timeout = timeout
 	}
@@ -178,29 +178,28 @@ func (c Client) GetMessage(ctx context.Context) (Message, error) {
 	case <-ctx.Done():
 		return msg, fmt.Errorf("connection lost timeout")
 	}
-	return msg, nil
 }
 
 var (
 	metaTag     = regexp.MustCompile(`<.*?>`)
-	parentheses = strings.NewReplacer("&lt;","<","&gt;",">")
+	parentheses = strings.NewReplacer("&lt;", "<", "&gt;", ">")
 )
 
 // PlainMessageText resolves meta tags of the message text and return it.
 func (c Client) PlainMessageText(msg string) string {
 	txt := metaTag.ReplaceAllStringFunc(msg, func(s string) string {
 		var id string
-		for i :=0; i < len(s)-2; i++ {
+		for i := 0; i < len(s)-2; i++ {
 			if s[i] == '@' {
-				id = s[i+1:len(s)-1]
+				id = s[i+1 : len(s)-1]
 				break
 			}
 		}
 		if v, ok := c.Users[id]; ok {
-			return "@"+v
+			return "@" + v
 		}
-		if id !=""{
-			return "@"+id
+		if id != "" {
+			return "@" + id
 		}
 		return s
 	})
