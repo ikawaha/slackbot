@@ -20,9 +20,10 @@ import (
 )
 
 const (
-	EventTypePing    = "ping"
-
+	//DefaultTimeout represents the time to wait for a response from slack.
 	DefaultTimeout = time.Minute
+
+	eventTypePing = "ping"
 )
 
 // Client represents a slack client.
@@ -160,7 +161,7 @@ func (c Client) GetMessage(ctx context.Context) (Message, error) {
 		select {
 		case <-ctx.Done():
 		case <-time.After(waiting):
-			if err := websocket.JSON.Send(c.socket, &Message{Type: EventTypePing, Time: time.Now().Unix()}); err != nil {
+			if err := websocket.JSON.Send(c.socket, &Message{Type: eventTypePing, Time: time.Now().Unix()}); err != nil {
 				log.Printf("ping error, %v", err)
 			}
 		}
@@ -244,7 +245,7 @@ func (c Client) UploadImage(channels []string, title, fileName, fileType, commen
 	}
 
 	req, err := http.NewRequest("POST", "https://slack.com/api/files.upload", &buf)
-	if err != nil{
+	if err != nil {
 		return fmt.Errorf("slack files.uplad new request error, %v", err)
 	}
 	req.Header.Set("Content-Type", mw.FormDataContentType())
