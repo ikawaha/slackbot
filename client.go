@@ -20,8 +20,10 @@ import (
 )
 
 const (
-	eventTypePing = "ping"
+	//DefaultTimeout represents the time to wait for a response from slack.
 	DefaultTimeout = time.Minute
+
+	eventTypePing = "ping"
 )
 
 // Client represents a slack client.
