@@ -36,7 +36,7 @@ defer bot.Close()
 fmt.Println("^C exits")
 
 for {
-    msg, err := bot.GetMessage()
+    msg, err := bot.ReceiveMessage()
     if err != nil {
        log.Printf("receive error, %v", err)
     }
