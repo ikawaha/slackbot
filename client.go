@@ -56,7 +56,7 @@ type connectResponse struct {
 }
 
 // New creates a slack bot from API token.
-// https://[YOURTEAM].slack.com/services/new/bot
+// https://[YOUR_TEAM].slack.com/services/new/bot
 func New(token string) (*Client, error) {
 	bot := Client{
 		Users:    map[string]string{},
@@ -149,8 +149,8 @@ func (c Client) UserName(uid string) string {
 	return name
 }
 
-// GetMessage receives a message from the slack channel.
-func (c Client) GetMessage(ctx context.Context) (Message, error) {
+// ReceiveMessage receives a message from the slack channel.
+func (c Client) ReceiveMessage(ctx context.Context) (Message, error) {
 	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
 	ch := make(chan error, 1)
@@ -171,7 +171,6 @@ func (c Client) GetMessage(ctx context.Context) (Message, error) {
 	go func() {
 		ch <- websocket.JSON.Receive(c.socket, &msg)
 	}()
-
 	select {
 	case err := <-ch:
 		return msg, err

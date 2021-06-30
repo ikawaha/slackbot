@@ -1,10 +1,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
-	"github.com/ikawaha/slackbot"
 	"log"
 	"os"
+	"strings"
+
+	"github.com/ikawaha/slackbot"
 )
 
 // your bot
@@ -34,14 +37,16 @@ func main() {
 	fmt.Println("^C exits")
 
 	for {
-		msg, err := bot.GetMessage()
+		msg, err := bot.ReceiveMessage(context.TODO())
 		if err != nil {
 			log.Printf("receive error, %v", err)
 		}
-		if bot.ID == msg.MentionID() && msg.Type == "message" && msg.SubType == "" {
+		if strings.Contains(msg.Text, bot.ID) && msg.Type == "message" && msg.SubType == "" {
 			go func(m slackbot.Message) {
-				m.Text = m.TextBody()
-				bot.PostMessage(m)
+				log.Print(m.Text)
+				if err := bot.PostMessage(m); err != nil {
+					log.Printf("post message failed: %v", err)
+				}
 			}(msg)
 		}
 	}
