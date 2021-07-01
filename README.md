@@ -12,9 +12,21 @@ see. https://api.slack.com/
 
 # Interface
 
-Echo bot sample.
+Echo bot sample (see. `sample/echo.go`).
 
 ```Go
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"os"
+	"strings"
+
+	"github.com/ikawaha/slackbot"
+)
+
 // your bot
 type Bot struct {
 	*slackbot.Client
@@ -28,25 +40,35 @@ func NewBot(token string) (*Bot, error) {
 	return &Bot{Client: c}, err
 }
 
-bot, err := NewBot(token) // set your bot token!
-if err != nil {
-    log.Fatal(err)
-}
-defer bot.Close()
-fmt.Println("^C exits")
+func main() {
+	if len(os.Args) != 2 {
+		fmt.Fprintf(os.Stderr, "usage: bot slack-bot-token\n")
+		os.Exit(1)
+	}
 
-for {
-    msg, err := bot.ReceiveMessage()
-    if err != nil {
-       log.Printf("receive error, %v", err)
-    }
-    if bot.ID == msg.MentionID() && msg.Type == "message" && msg.SubType == "" {
-        go func(m slackbot.Message) {
-           m.Text = m.TextBody()
-           bot.PostMessage(m)
-        }(msg)
-    }
+	bot, err := NewBot(os.Args[1]) // set your bot token!
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer bot.Close()
+	fmt.Println("^C exits")
+
+	for {
+		msg, err := bot.ReceiveMessage(context.TODO())
+		if err != nil {
+			log.Printf("receive error, %v", err)
+		}
+		if strings.Contains(msg.Text, bot.ID) && msg.Type == "message" && msg.SubType == "" {
+			go func(m slackbot.Message) {
+				log.Print(m.Text)
+				if err := bot.PostMessage(m); err != nil {
+					log.Printf("post message failed: %v", err)
+				}
+			}(msg)
+		}
+	}
 }
+
 
 ```
 
