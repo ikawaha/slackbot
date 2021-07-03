@@ -1,3 +1,5 @@
+[![Go Reference](https://pkg.go.dev/badge/github.com/ikawaha/slackbot.svg)](https://pkg.go.dev/github.com/ikawaha/slackbot)
+
 # slackbot
 
 Tiny slack bot client.
@@ -13,7 +15,7 @@ see. https://api.slack.com/
 # Interface
 
 Echo bot sample (see. `sample/echo.go`).
-
+See also [kagome-bot](https://github.com/ikawaha/kagome-bot).
 ```Go
 package main
 
