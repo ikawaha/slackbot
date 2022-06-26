@@ -54,7 +54,7 @@ func New(token string, opts ...Option) (*Client, error) {
 
 // PostMessage sends a message to the Slack channel.
 // see. https://api.slack.com/methods/chat.postMessage
-func (c Client) PostMessage(ctx context.Context, channelID string, msg string) (*MessageResponse, error) {
+func (c *Client) PostMessage(ctx context.Context, channelID string, msg string) (*MessageResponse, error) {
 	body := url.Values{
 		"token":   {c.token},
 		"channel": {channelID},
@@ -87,7 +87,7 @@ func (c Client) PostMessage(ctx context.Context, channelID string, msg string) (
 
 // UploadImage uploads an image by files.upload API.
 // see. https://api.slack.com/methods/files.upload
-func (c Client) UploadImage(channels []string, title, fileName, fileType, comment string, img io.Reader) error {
+func (c *Client) UploadImage(channels []string, title, fileName, fileType, comment string, img io.Reader) error {
 	if c.token == "" {
 		return fmt.Errorf("slack token is empty")
 	}
@@ -95,7 +95,7 @@ func (c Client) UploadImage(channels []string, title, fileName, fileType, commen
 	mw := multipart.NewWriter(&buf)
 	part, err := mw.CreateFormFile("file", fileName)
 	if err != nil {
-		return fmt.Errorf("multipart create from file error, %v, %v", title, err)
+		return fmt.Errorf("multipart create from file error, %v, %w", title, err)
 	}
 	if _, err := io.Copy(part, img); err != nil {
 		return fmt.Errorf("file copy error, %v, %w", title, err)
@@ -140,7 +140,7 @@ func (c Client) UploadImage(channels []string, title, fileName, fileType, commen
 
 // UsersList lists all users in a Slack team.
 // see. https://api.slack.com/methods/users.list
-func (c Client) UsersList() ([]User, error) {
+func (c *Client) UsersList() ([]User, error) {
 	req, err := http.NewRequestWithContext(context.TODO(), http.MethodPost, usersListEndpoint, nil)
 	if err != nil {
 		return nil, err
@@ -174,7 +174,7 @@ func (c Client) UsersList() ([]User, error) {
 }
 
 // Users lists all users in a Slack team and returns it's userID map.
-func (c Client) Users() (map[string]User, error) {
+func (c *Client) Users() (map[string]User, error) {
 	list, err := c.UsersList()
 	if err != nil {
 		return nil, err
@@ -199,7 +199,7 @@ func (c *Client) RefreshUsersCache() error {
 }
 
 // User returns the user corresponding to user ID from the client's user cache.
-func (c Client) User(id string) (User, bool) {
+func (c *Client) User(id string) (User, bool) {
 	u, ok := c.usersCache[id]
 	if ok {
 		return u, true

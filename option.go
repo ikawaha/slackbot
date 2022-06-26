@@ -6,16 +6,16 @@ import (
 )
 
 type config struct {
-	webapiClientOptions     []webapi.Option
-	socketmodeClientOptions []socketmode.Option
+	webAPIClientOptions     []webapi.Option
+	socketModeClientOptions []socketmode.Option
 }
 
-func (c *config) AddWebapiOption(o webapi.Option) {
-	c.webapiClientOptions = append(c.webapiClientOptions, o)
+func (c *config) AddWebAPIOption(o webapi.Option) {
+	c.webAPIClientOptions = append(c.webAPIClientOptions, o)
 }
 
-func (c *config) AddSocketmodeOption(o socketmode.Option) {
-	c.socketmodeClientOptions = append(c.socketmodeClientOptions, o)
+func (c *config) AddSocketModeOption(o socketmode.Option) {
+	c.socketModeClientOptions = append(c.socketModeClientOptions, o)
 }
 
 // Option represents the client's option.
@@ -24,7 +24,7 @@ type Option func(*config) error
 // CacheUsers lists all users in a Slack team and caches it.
 func CacheUsers() Option {
 	return func(c *config) error {
-		c.AddWebapiOption(webapi.CacheUsers())
+		c.AddWebAPIOption(webapi.CacheUsers())
 		return nil
 	}
 }
@@ -32,8 +32,8 @@ func CacheUsers() Option {
 // Debug is the debug option.
 func Debug() Option {
 	return func(c *config) error {
-		c.AddWebapiOption(webapi.Debug())
-		c.AddSocketmodeOption(socketmode.Debug())
+		c.AddWebAPIOption(webapi.Debug())
+		c.AddSocketModeOption(socketmode.Debug())
 		return nil
 	}
 }

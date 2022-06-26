@@ -53,7 +53,7 @@ func New(token string, opts ...Option) (*Client, error) {
 }
 
 // Close closes the client.
-func (c Client) Close() error {
+func (c *Client) Close() error {
 	return c.socket.Close()
 }
 
@@ -117,7 +117,7 @@ func (c *Client) reconnect() error {
 }
 
 // ReceiveMessage receives a message and passes it to a handler for processing.
-func (c Client) ReceiveMessage(ctx context.Context, handler func(context.Context, *Event) error) error {
+func (c *Client) ReceiveMessage(ctx context.Context, handler func(context.Context, *Event) error) error {
 	ch := make(chan interface{}, 1)
 	go func() {
 		var e Envelope
@@ -130,7 +130,7 @@ func (c Client) ReceiveMessage(ctx context.Context, handler func(context.Context
 	case msg := <-ch:
 		event, err := c.openEnvelope(msg)
 		if err != nil {
-			log.Println(err, "reconnect...")
+			log.Println(err, ", reconnect...")
 			if err := c.reconnect(); err != nil {
 				return err
 			}
@@ -146,7 +146,7 @@ func (c Client) ReceiveMessage(ctx context.Context, handler func(context.Context
 	return nil
 }
 
-func (c Client) openEnvelope(msg interface{}) (*Event, error) {
+func (c *Client) openEnvelope(msg interface{}) (*Event, error) {
 	switch t := msg.(type) {
 	default:
 		return nil, fmt.Errorf("unknown message type: %T, %+v", msg, msg)
@@ -158,7 +158,7 @@ func (c Client) openEnvelope(msg interface{}) (*Event, error) {
 	return nil, fmt.Errorf("unknown message type: %T, %+v", msg, msg)
 }
 
-func (c Client) processEnvelope(ev *Envelope) (*Event, error) {
+func (c *Client) processEnvelope(ev *Envelope) (*Event, error) {
 	if c.debug {
 		dump, _ := json.MarshalIndent(ev, "", "  ")
 		log.Printf("envelope:%s", dump)
