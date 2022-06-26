@@ -79,8 +79,8 @@ func (c Client) PlainMessageText(msg string) string {
 
 // UploadImage uploads an image by files.upload API.
 // see. https://api.slack.com/methods/files.upload
-func (c Client) UploadImage(channels []string, title, fileName, fileType, comment string, img io.Reader) error {
-	return c.webAPIClient.UploadImage(channels, title, fileName, fileType, comment, img)
+func (c Client) UploadImage(ctx context.Context, channels []string, title, fileName, fileType, comment string, img io.Reader) error {
+	return c.webAPIClient.UploadImage(ctx, channels, title, fileName, fileType, comment, img)
 }
 
 // Close implements the io.Closer interface.
@@ -90,18 +90,18 @@ func (c *Client) Close() error {
 
 // UsersList lists all users in a Slack team.
 // see. https://api.slack.com/methods/users.list
-func (c Client) UsersList() ([]webapi.User, error) {
-	return c.webAPIClient.UsersList()
+func (c Client) UsersList(ctx context.Context) ([]webapi.User, error) {
+	return c.webAPIClient.UsersList(ctx)
 }
 
 // Users lists all users in a Slack team and returns it's userID map.
-func (c Client) Users() (map[string]webapi.User, error) {
-	return c.webAPIClient.Users()
+func (c Client) Users(ctx context.Context) (map[string]webapi.User, error) {
+	return c.webAPIClient.Users(ctx)
 }
 
 // RefreshUsersCache updates the client's cached user map.
-func (c *Client) RefreshUsersCache() error {
-	return c.webAPIClient.RefreshUsersCache()
+func (c *Client) RefreshUsersCache(ctx context.Context) error {
+	return c.webAPIClient.RefreshUsersCache(ctx)
 }
 
 // User returns the user corresponding to user ID from the client's user cache.

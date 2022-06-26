@@ -87,7 +87,7 @@ func (c *Client) PostMessage(ctx context.Context, channelID string, msg string) 
 
 // UploadImage uploads an image by files.upload API.
 // see. https://api.slack.com/methods/files.upload
-func (c *Client) UploadImage(channels []string, title, fileName, fileType, comment string, img io.Reader) error {
+func (c *Client) UploadImage(ctx context.Context, channels []string, title, fileName, fileType, comment string, img io.Reader) error {
 	if c.token == "" {
 		return fmt.Errorf("slack token is empty")
 	}
@@ -117,7 +117,7 @@ func (c *Client) UploadImage(channels []string, title, fileName, fileType, comme
 		return err
 	}
 
-	req, err := http.NewRequest("POST", filesUploadEndpoint, &buf)
+	req, err := http.NewRequestWithContext(ctx, "POST", filesUploadEndpoint, &buf)
 	if err != nil {
 		return fmt.Errorf("slack files.uplad new request error, %w", err)
 	}
@@ -140,8 +140,8 @@ func (c *Client) UploadImage(channels []string, title, fileName, fileType, comme
 
 // UsersList lists all users in a Slack team.
 // see. https://api.slack.com/methods/users.list
-func (c *Client) UsersList() ([]User, error) {
-	req, err := http.NewRequestWithContext(context.TODO(), http.MethodPost, usersListEndpoint, nil)
+func (c *Client) UsersList(ctx context.Context) ([]User, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, usersListEndpoint, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -174,8 +174,8 @@ func (c *Client) UsersList() ([]User, error) {
 }
 
 // Users lists all users in a Slack team and returns it's userID map.
-func (c *Client) Users() (map[string]User, error) {
-	list, err := c.UsersList()
+func (c *Client) Users(ctx context.Context) (map[string]User, error) {
+	list, err := c.UsersList(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -187,8 +187,8 @@ func (c *Client) Users() (map[string]User, error) {
 }
 
 // RefreshUsersCache updates the client's cached user map.
-func (c *Client) RefreshUsersCache() error {
-	us, err := c.Users()
+func (c *Client) RefreshUsersCache(ctx context.Context) error {
+	us, err := c.Users(ctx)
 	if err != nil {
 		return err
 	}
