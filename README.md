@@ -33,7 +33,7 @@ import (
 	"github.com/ikawaha/slackbot/socketmode"
 )
 
-// your bot
+// Bot your bot
 type Bot struct {
 	*slackbot.Client
 }
