@@ -22,10 +22,9 @@ const (
 )
 
 const (
-	postMessageEndpoint       = "https://slack.com/api/chat.postMessage"
-	filesUploadEndpoint       = "https://slack.com/api/files.upload"
-	usersListEndpoint         = "https://slack.com/api/users.list"
-	conversationsInfoEndpoint = "https://slack.com/api/conversations.info"
+	postMessageEndpoint = "https://slack.com/api/chat.postMessage"
+	filesUploadEndpoint = "https://slack.com/api/files.upload"
+	usersListEndpoint   = "https://slack.com/api/users.list"
 )
 
 // Client represents a Slack client for Web API.
