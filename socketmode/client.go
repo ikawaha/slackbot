@@ -118,7 +118,7 @@ func (c *Client) reconnect() error {
 
 // ReceiveMessage receives a message and passes it to a handler for processing.
 func (c Client) ReceiveMessage(ctx context.Context, handler func(context.Context, *Event) error) error {
-	ch := make(chan any, 1)
+	ch := make(chan interface{}, 1)
 	go func() {
 		var e Envelope
 		if err := websocket.JSON.Receive(c.socket, &e); err != nil {
@@ -146,7 +146,7 @@ func (c Client) ReceiveMessage(ctx context.Context, handler func(context.Context
 	return nil
 }
 
-func (c Client) openEnvelope(msg any) (*Event, error) {
+func (c Client) openEnvelope(msg interface{}) (*Event, error) {
 	switch t := msg.(type) {
 	default:
 		return nil, fmt.Errorf("unknown message type: %T, %+v", msg, msg)

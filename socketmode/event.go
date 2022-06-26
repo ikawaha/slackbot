@@ -23,11 +23,11 @@ type EventPayload struct {
 	Event        Event  `json:"event"`
 	EventTime    int    `json:"event_time"`
 	EventContext string `json:"event_context"`
-	//	APIAppID           string `json:"api_app_id"`
-	//	Authorizations     []any  `json:"authorizations"`
-	//	IsExtSharedChannel bool   `json:"is_ext_shared_channel"`
-	//	TeamID             string `json:"team_id"`
-	//	Token              string `json:"token"`
+	//APIAppID           string        `json:"api_app_id"`
+	//Authorizations     []interface{} `json:"authorizations"`
+	//IsExtSharedChannel bool          `json:"is_ext_shared_channel"`
+	//TeamID             string        `json:"team_id"`
+	//Token              string        `json:"token"`
 }
 
 // Event represents the Slack event.
