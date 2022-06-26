@@ -45,6 +45,7 @@ var (
 	parentheses = strings.NewReplacer("&lt;", "<", "&gt;", ">")
 )
 
+// ReceiveMessage receives a message and passes it to a handler for processing.
 func (c Client) ReceiveMessage(ctx context.Context, handler func(ctx context.Context, event *socketmode.Event) error) error {
 	return c.socketModeClient.ReceiveMessage(ctx, handler)
 }

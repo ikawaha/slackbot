@@ -29,6 +29,7 @@ func CacheUsers() Option {
 	}
 }
 
+// Debug is the debug option.
 func Debug() Option {
 	return func(c *config) error {
 		c.AddWebapiOption(webapi.Debug())
