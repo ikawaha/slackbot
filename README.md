@@ -2,21 +2,25 @@
 
 # slackbot
 
-Tiny slack bot client.
+Tiny Slack bot client using the web socket mode.
 
 # Prepare
 
-Please get the token for your slack bot.
+see. https://api.slack.com/apis/connections/socket
 
-`https://[YOURTEAM].slack.com/services/new/bot`
-
-see. https://api.slack.com/
+* app-level token
+* bot token
+    * app-mention:read
+    * channels:history
+    * im:history
+    * chat:write
+    * users:read
 
 # Interface
 
 Echo bot sample (see. `sample/echo.go`).
-See also [kagome-bot](https://github.com/ikawaha/kagome-bot).
-```Go
+
+```go
 package main
 
 import (
@@ -24,9 +28,9 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 
 	"github.com/ikawaha/slackbot"
+	"github.com/ikawaha/slackbot/socketmode"
 )
 
 // your bot
@@ -34,8 +38,8 @@ type Bot struct {
 	*slackbot.Client
 }
 
-func NewBot(token string) (*Bot, error) {
-	c, err := slackbot.New(token)
+func NewBot(appToken, botToken string) (*Bot, error) {
+	c, err := slackbot.New(appToken, botToken, slackbot.CacheUsers(), slackbot.Debug())
 	if err != nil {
 		return nil, err
 	}
@@ -43,12 +47,12 @@ func NewBot(token string) (*Bot, error) {
 }
 
 func main() {
-	if len(os.Args) != 2 {
-		fmt.Fprintf(os.Stderr, "usage: bot slack-bot-token\n")
+	if len(os.Args) != 3 {
+		fmt.Fprintf(os.Stderr, "usage: bot app-level-token slack-bot-token\n")
 		os.Exit(1)
 	}
 
-	bot, err := NewBot(os.Args[1]) // set your bot token!
+	bot, err := NewBot(os.Args[1], os.Args[2]) // set your app-level-token and bot token!
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -56,22 +60,21 @@ func main() {
 	fmt.Println("^C exits")
 
 	for {
-		msg, err := bot.ReceiveMessage(context.TODO())
-		if err != nil {
-			log.Printf("receive error, %v", err)
-		}
-		if strings.Contains(msg.Text, bot.ID) && msg.Type == "message" && msg.SubType == "" {
-			go func(m slackbot.Message) {
-				log.Print(m.Text)
-				if err := bot.PostMessage(m); err != nil {
-					log.Printf("post message failed: %v", err)
-				}
-			}(msg)
+		if err := bot.ReceiveMessage(context.TODO(), func(ctx context.Context, ev *socketmode.Event) error {
+			u, ok := bot.User(ev.UserID)
+			if !ok || u.IsBot {
+				return nil
+			}
+			msg := "Hello, " + u.Name + ": " + ev.Text
+			if err := bot.PostMessage(ctx, ev.Channel, msg); err != nil {
+				return err
+			}
+			return nil
+		}); err != nil {
+			log.Printf("%v", err)
 		}
 	}
 }
-
-
 ```
 
 # Lisence
