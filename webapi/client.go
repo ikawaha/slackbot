@@ -98,7 +98,7 @@ func (c Client) UploadImage(channels []string, title, fileName, fileType, commen
 		return fmt.Errorf("multipart create from file error, %v, %v", title, err)
 	}
 	if _, err := io.Copy(part, img); err != nil {
-		return fmt.Errorf("file copy error, %v, %v", title, err)
+		return fmt.Errorf("file copy error, %v, %w", title, err)
 	}
 	// for slack settings
 	settings := map[string]string{
@@ -110,7 +110,7 @@ func (c Client) UploadImage(channels []string, title, fileName, fileType, commen
 	}
 	for k, v := range settings {
 		if err := mw.WriteField(k, v); err != nil {
-			return fmt.Errorf("write field error, %v:%v, %v", k, v, err)
+			return fmt.Errorf("write field error, %v:%v, %w", k, v, err)
 		}
 	}
 	if err := mw.Close(); err != nil {
@@ -119,13 +119,13 @@ func (c Client) UploadImage(channels []string, title, fileName, fileType, commen
 
 	req, err := http.NewRequest("POST", filesUploadEndpoint, &buf)
 	if err != nil {
-		return fmt.Errorf("slack files.uplad new request error, %v", err)
+		return fmt.Errorf("slack files.uplad new request error, %w", err)
 	}
 	req.Header.Set("Content-Type", mw.FormDataContentType())
 	cl := &http.Client{Timeout: 10 * time.Second}
 	resp, err := cl.Do(req)
 	if err != nil {
-		return fmt.Errorf("slack files.upload error, %v", err)
+		return fmt.Errorf("slack files.upload error, %w", err)
 	}
 	defer resp.Body.Close()
 	b, err := ioutil.ReadAll(resp.Body)
