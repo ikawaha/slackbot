@@ -10,10 +10,12 @@ type config struct {
 	socketModeClientOptions []socketmode.Option
 }
 
+// AddWebAPIOption adds an option to the Web API client.
 func (c *config) AddWebAPIOption(o webapi.Option) {
 	c.webAPIClientOptions = append(c.webAPIClientOptions, o)
 }
 
+// AddSocketModeOption adds an option to the Socket Mode client.
 func (c *config) AddSocketModeOption(o socketmode.Option) {
 	c.socketModeClientOptions = append(c.socketModeClientOptions, o)
 }
