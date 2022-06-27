@@ -107,9 +107,9 @@ func (c *Client) dial(url string) error {
 	return nil
 }
 
-func (c *Client) reconnect() error {
+func (c *Client) reconnect(ctx context.Context) error {
 	_ = c.Close()
-	wss, err := connectionOpen(context.TODO(), c.token)
+	wss, err := connectionOpen(ctx, c.token)
 	if err != nil {
 		return err
 	}
@@ -128,10 +128,10 @@ func (c *Client) ReceiveMessage(ctx context.Context, handler func(context.Contex
 	}()
 	select {
 	case msg := <-ch:
-		event, err := c.openEnvelope(msg)
+		event, err := c.openEnvelope(ctx, msg)
 		if err != nil {
 			log.Println(err, ", reconnect...")
-			if err := c.reconnect(); err != nil {
+			if err := c.reconnect(ctx); err != nil {
 				return err
 			}
 		}
@@ -146,43 +146,47 @@ func (c *Client) ReceiveMessage(ctx context.Context, handler func(context.Contex
 	return nil
 }
 
-func (c *Client) openEnvelope(msg interface{}) (*Event, error) {
+func (c *Client) openEnvelope(ctx context.Context, msg interface{}) (*Event, error) {
 	switch t := msg.(type) {
-	default:
-		return nil, fmt.Errorf("unknown message type: %T, %+v", msg, msg)
 	case error:
 		return nil, t
 	case *Envelope:
-		return c.processEnvelope(t)
+		return c.processEnvelope(ctx, t)
+	default:
+		return nil, fmt.Errorf("unknown message type: %T, %+v", msg, msg)
 	}
-	return nil, fmt.Errorf("unknown message type: %T, %+v", msg, msg)
 }
 
-func (c *Client) processEnvelope(ev *Envelope) (*Event, error) {
+func (c *Client) processEnvelope(ctx context.Context, el *Envelope) (*Event, error) {
 	if c.debug {
-		dump, _ := json.MarshalIndent(ev, "", "  ")
+		dump, err := json.MarshalIndent(el, "", "  ")
+		if err != nil {
+			log.Printf("envelope marshal error: %v", err)
+		}
 		log.Printf("envelope:%s", dump)
 	}
 	// ack
-	if ev.EnvelopeID != "" {
-		if err := websocket.JSON.Send(c.socket, Acknowledge{EnvelopeID: ev.EnvelopeID}); err != nil {
+	if el.EnvelopeID != "" {
+		if err := websocket.JSON.Send(c.socket, Acknowledge{EnvelopeID: el.EnvelopeID}); err != nil {
 			return nil, fmt.Errorf("acknowledge error: %w", err)
 		}
 	}
-	switch ev.Type {
-	case "events_api":
-		ret, err := extractEvent(ev)
+	switch EnvelopeType(el.Type) {
+	case EventsAPI:
+		ret, err := extractEvent(el)
 		if err != nil {
 			return nil, fmt.Errorf("dicpatch error: %w", err)
 		}
 		return ret, nil
-	case "disconnect":
-		log.Printf("refresh: event_type: %s, %q", ev.Type, ev.Payload)
-		return nil, c.reconnect()
+	case Disconnect:
+		log.Printf("refresh: event_type: %s, %q", el.Type, el.Payload)
+		return nil, c.reconnect(ctx)
+	case Hello:
+		log.Println("event_type: hello, client has successfully connected to the server")
 	default:
-		log.Printf("skip: event_type: %s, payload: %q", ev.Type, ev.Payload)
-		return nil, nil
+		log.Printf("skip: event_type: %s, payload: %q", el.Type, el.Payload)
 	}
+	return nil, nil
 }
 
 func extractEvent(e *Envelope) (*Event, error) {

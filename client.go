@@ -19,6 +19,14 @@ type Client struct {
 	socketModeClient *socketmode.Client
 }
 
+type (
+	// Event is an alias type of the socket mode event.
+	Event = socketmode.Event
+
+	// User is an alias type of the web api user.
+	User = webapi.User
+)
+
 // New creates a slack bot from app-level token and API token.
 func New(appLevelToken, apiToken, botName string, opts ...Option) (*Client, error) {
 	var c config
@@ -55,7 +63,7 @@ var (
 )
 
 // ReceiveMessage receives a message and passes it to a handler for processing.
-func (c Client) ReceiveMessage(ctx context.Context, handler func(ctx context.Context, event *socketmode.Event) error) error {
+func (c Client) ReceiveMessage(ctx context.Context, handler func(ctx context.Context, e *Event) error) error {
 	return c.socketModeClient.ReceiveMessage(ctx, handler)
 }
 
@@ -99,12 +107,12 @@ func (c *Client) Close() error {
 
 // UsersList lists all users in a Slack team.
 // see. https://api.slack.com/methods/users.list
-func (c Client) UsersList(ctx context.Context) ([]webapi.User, error) {
+func (c Client) UsersList(ctx context.Context) ([]User, error) {
 	return c.webAPIClient.UsersList(ctx)
 }
 
 // Users lists all users in a Slack team and returns it's userID map.
-func (c Client) Users(ctx context.Context) (map[string]webapi.User, error) {
+func (c Client) Users(ctx context.Context) (map[string]User, error) {
 	return c.webAPIClient.Users(ctx)
 }
 
@@ -114,6 +122,6 @@ func (c *Client) RefreshUsersCache(ctx context.Context) error {
 }
 
 // User returns the user corresponding to user ID from the client's user cache.
-func (c *Client) User(id string) (webapi.User, bool) {
+func (c *Client) User(id string) (User, bool) {
 	return c.webAPIClient.User(id)
 }
