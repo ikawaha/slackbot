@@ -10,13 +10,14 @@ import (
 	"github.com/ikawaha/slackbot"
 )
 
-// your bot
+// Bot your bot
 type Bot struct {
 	*slackbot.Client
 }
 
-func NewBot(token string) (*Bot, error) {
-	c, err := slackbot.New(token)
+// NewBot creates a Slack bot.
+func NewBot(appToken, botToken, botName string) (*Bot, error) {
+	c, err := slackbot.New(appToken, botToken, botName)
 	if err != nil {
 		return nil, err
 	}
@@ -24,30 +25,39 @@ func NewBot(token string) (*Bot, error) {
 }
 
 func main() {
-	if len(os.Args) != 2 {
-		fmt.Fprintf(os.Stderr, "usage: bot slack-bot-token\n")
+	if len(os.Args) != 4 {
+		fmt.Fprintf(os.Stderr, "usage: bot app-level-token slack-bot-token bot-name\n")
 		os.Exit(1)
 	}
-
-	bot, err := NewBot(os.Args[1]) // set your bot token!
+	// set your app-level-token, bot token and bot name!
+	bot, err := NewBot(os.Args[1], os.Args[2], os.Args[3])
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer bot.Close()
 	fmt.Println("^C exits")
 
+	callPrefix := "<@" + bot.ID + ">"
 	for {
-		msg, err := bot.ReceiveMessage(context.TODO())
-		if err != nil {
-			log.Printf("receive error, %v", err)
-		}
-		if strings.Contains(msg.Text, bot.ID) && msg.Type == "message" && msg.SubType == "" {
-			go func(m slackbot.Message) {
-				log.Print(m.Text)
-				if err := bot.PostMessage(m); err != nil {
-					log.Printf("post message failed: %v", err)
-				}
-			}(msg)
+		if err := bot.ReceiveMessage(context.TODO(), func(ctx context.Context, e *slackbot.Event) error {
+			log.Printf("-->%#+v", e)
+			if !e.IsMessage() {
+				return nil
+			}
+			u, ok := bot.User(e.UserID)
+			if !ok || u.IsBot {
+				return nil
+			}
+			if !strings.HasPrefix(e.Text, callPrefix) {
+				return nil
+			}
+			msg := "Hi, " + u.Name + ": " + strings.TrimPrefix(e.Text, callPrefix)
+			if err := bot.PostMessage(ctx, e.Channel, msg); err != nil {
+				return err
+			}
+			return nil
+		}); err != nil {
+			log.Printf("%v", err)
 		}
 	}
 }

@@ -1,5 +1,5 @@
 module github.com/ikawaha/slackbot
 
-go 1.12
+go 1.17
 
-require golang.org/x/net v0.0.0-20190404232315-eb5bcb51f2a3
+require golang.org/x/net v0.0.0-20220624214902-1bab6f366d9e
