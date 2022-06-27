@@ -206,3 +206,13 @@ func (c *Client) User(id string) (User, bool) {
 	}
 	return u, false
 }
+
+// UserID returns the userID corresponding to the username from the client's user cache.
+func (c *Client) UserID(name string) string {
+	for k, v := range c.usersCache {
+		if v.Name == name {
+			return k
+		}
+	}
+	return ""
+}

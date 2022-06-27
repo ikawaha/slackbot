@@ -23,14 +23,6 @@ func (c *config) AddSocketModeOption(o socketmode.Option) {
 // Option represents the client's option.
 type Option func(*config) error
 
-// CacheUsers lists all users in a Slack team and caches it.
-func CacheUsers() Option {
-	return func(c *config) error {
-		c.AddWebAPIOption(webapi.CacheUsers())
-		return nil
-	}
-}
-
 // Debug is the debug option.
 func Debug() Option {
 	return func(c *config) error {

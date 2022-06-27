@@ -2,6 +2,7 @@ package slackbot
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"regexp"
 	"strings"
@@ -12,28 +13,36 @@ import (
 
 // Client represents a slack client.
 type Client struct {
+	Name             string
+	ID               string
 	webAPIClient     *webapi.Client
 	socketModeClient *socketmode.Client
-	members          map[string]webapi.User // cache
 }
 
 // New creates a slack bot from app-level token and API token.
-func New(appLevelToken, apiToken string, opts ...Option) (*Client, error) {
+func New(appLevelToken, apiToken, botName string, opts ...Option) (*Client, error) {
 	var c config
 	for _, opt := range opts {
 		if err := opt(&c); err != nil {
 			return nil, err
 		}
 	}
+	c.webAPIClientOptions = append(c.webAPIClientOptions, webapi.CacheUsers())
 	a, err := webapi.New(apiToken, c.webAPIClientOptions...)
 	if err != nil {
 		return nil, err
+	}
+	id := a.UserID(botName)
+	if id == "" {
+		return nil, fmt.Errorf("bot-name not found: %s", botName)
 	}
 	s, err := socketmode.New(appLevelToken, c.socketModeClientOptions...)
 	if err != nil {
 		return nil, err
 	}
 	ret := Client{
+		Name:             botName,
+		ID:               id,
 		webAPIClient:     a,
 		socketModeClient: s,
 	}
@@ -66,7 +75,7 @@ func (c Client) PlainMessageText(msg string) string {
 				break
 			}
 		}
-		if v, ok := c.members[id]; ok {
+		if v, ok := c.webAPIClient.User(id); ok {
 			return "@" + v.Name
 		}
 		if id != "" {
