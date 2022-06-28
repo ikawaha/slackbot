@@ -2,11 +2,13 @@ package webapi
 
 // MessageResponse represents the response of the chat.postMessage API.
 type MessageResponse struct {
-	OK      bool    `json:"ok,omitempty"`
-	Error   string  `json:"error,omitempty"`
-	Channel string  `json:"channel,omitempty"`
-	TS      string  `json:"ts,omitempty"`
-	Message Message `json:"message,omitempty"`
+	OK       bool    `json:"ok,omitempty"`
+	Error    string  `json:"error,omitempty"`
+	Needed   string  `json:"needed,omitempty"`
+	Provided string  `json:"provided,omitempty"`
+	Channel  string  `json:"channel,omitempty"`
+	TS       string  `json:"ts,omitempty"`
+	Message  Message `json:"message,omitempty"`
 }
 
 // Message represents the Slack message.

@@ -8,6 +8,7 @@ import (
 type Option func(*Client) error
 
 // CacheUsers lists all users in a Slack team and caches it.
+// required scopes: `users:read`
 func CacheUsers() Option {
 	return func(c *Client) error {
 		return c.RefreshUsersCache(context.TODO())

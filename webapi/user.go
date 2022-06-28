@@ -11,9 +11,11 @@ type UsersListResponse struct {
 
 // User represents the Slack user.
 type User struct {
-	ID       string `json:"id,omitempty"`
-	TeamID   string `json:"team_id,omitempty"`
-	Name     string `json:"name,omitempty"`
-	RealName string `json:"real_name,omitempty"`
-	IsBot    bool   `json:"is_bot,omitempty"`
+	ID        string `json:"id,omitempty"`
+	TeamID    string `json:"team_id,omitempty"`
+	Name      string `json:"name,omitempty"`
+	RealName  string `json:"real_name,omitempty"`
+	IsBot     bool   `json:"is_bot,omitempty"`
+	Deleted   bool   `json:"deleted,omitempty"`
+	IsAppUser bool   `json:"is_app_user"`
 }
