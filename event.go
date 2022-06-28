@@ -4,6 +4,7 @@ import (
 	"github.com/ikawaha/slackbot/socketmode"
 )
 
+// EventType is the Slack event type.
 type EventType = socketmode.EventType
 
 const (
