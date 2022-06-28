@@ -115,7 +115,7 @@ func (c *Client) RespondToCommand(ctx context.Context, responseURL string, msg s
 		return fmt.Errorf("command response failed: %w", err)
 	}
 	defer resp.Body.Close()
-	io.Copy(io.Discard, resp.Body)
+	io.Copy(io.Discard, resp.Body) // nolint:errcheck
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("slack command response failed: %v, %q", resp.Status, string(p))
 	}
