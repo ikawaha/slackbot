@@ -173,11 +173,9 @@ func (c *Client) processEnvelope(ctx context.Context, el *Envelope) (*Event, err
 	}
 	switch EnvelopeType(el.Type) {
 	case EventsAPI:
-		ret, err := extractEvent(el)
-		if err != nil {
-			return nil, fmt.Errorf("dicpatch error: %w", err)
-		}
-		return ret, nil
+		return &el.Payload.Event, nil
+	case SlashCommands:
+		return newSlashCommandEvent(&el.Payload), nil
 	case Disconnect:
 		log.Printf("refresh: event_type: %s, %q", el.Type, el.Payload)
 		return nil, c.reconnect(ctx)
@@ -189,10 +187,16 @@ func (c *Client) processEnvelope(ctx context.Context, el *Envelope) (*Event, err
 	return nil, nil
 }
 
-func extractEvent(e *Envelope) (*Event, error) {
-	var p EventPayload
-	if err := json.Unmarshal(e.Payload, &p); err != nil {
-		return nil, err
+func newSlashCommandEvent(p *EventPayload) *Event {
+	return &Event{
+		Type:        SlashCommand,
+		UserID:      p.UserID,
+		AppID:       p.APIAppID,
+		TeamID:      p.TeamID,
+		Text:        p.Text,
+		Command:     p.Command,
+		UserName:    p.UserName,
+		ResponseURL: p.ResponseURL,
+		TriggerID:   p.TriggerID,
 	}
-	return &p.Event, nil
 }

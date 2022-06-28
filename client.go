@@ -73,6 +73,11 @@ func (c Client) PostMessage(ctx context.Context, channelID, msg string) error {
 	return err
 }
 
+// RespondToCommand responds to the Slack command.
+func (c Client) RespondToCommand(ctx context.Context, responseURL string, msg string, visible bool) error {
+	return c.webAPIClient.RespondToCommand(ctx, responseURL, msg, visible)
+}
+
 // PlainMessageText resolves meta tags of the message text and return it.
 func (c Client) PlainMessageText(msg string) string {
 	txt := metaTag.ReplaceAllStringFunc(msg, func(s string) string {

@@ -28,7 +28,7 @@ const (
 type Envelope struct {
 	Type                   string          `json:"type"`
 	EnvelopeID             string          `json:"envelope_id"`
-	Payload                json.RawMessage `json:"payload"`
+	Payload                EventPayload    `json:"payload"`
 	AcceptsResponsePayload bool            `json:"accepts_response_payload"`
 	RetryAttempt           int             `json:"retry_attempt"`
 	RetryReason            string          `json:"retry_reason"`
@@ -48,6 +48,14 @@ type EventPayload struct {
 	IsExtSharedChannel bool          `json:"is_ext_shared_channel"`
 	TeamID             string        `json:"team_id"`
 	Token              string        `json:"token"`
+
+	// for slash_commands
+	Command     string `json:"command"`
+	UserID      string `json:"user_id"`
+	Text        string `json:"text"`
+	UserName    string `json:"user_name"`
+	ResponseURL string `json:"response_url"`
+	TriggerID   string `json:"trigger_id"`
 }
 
 // Event represents the Slack event.
@@ -57,12 +65,19 @@ type Event struct {
 	Channel     string `json:"channel"`
 	UserID      string `json:"user"`
 	ClientMsgID string `json:"client_msg_id"`
+	AppID       string `json:"app_id"`
 	BotID       string `json:"bot_id"`
 	TeamID      string `json:"team"`
 	Text        string `json:"text"`
 	TS          string `json:"ts"`
 	EventTS     string `json:"event_ts"`
 	ChannelType string `json:"channel_type"`
+
+	// extended for slash_command
+	Command     string `json:"command"`
+	UserName    string `json:"user_name"`
+	ResponseURL string `json:"response_url"`
+	TriggerID   string `json:"trigger_id"`
 }
 
 // Acknowledge represents the payload type of the response back to Slack acknowledging.
@@ -82,6 +97,9 @@ const (
 	// Message is a Slack event type.
 	// A message was sent to a channel.
 	Message EventType = "message"
+
+	// SlashCommand is a slash command.
+	SlashCommand = "slash_command"
 )
 
 // Is returns true, if the event type equals tne given event type.
@@ -97,4 +115,9 @@ func (e Event) IsAppMention() bool {
 // IsMessage returns true, if the event type is "message".
 func (e Event) IsMessage() bool {
 	return e.Is(Message)
+}
+
+// IsSlashCommand returns true, if the event type is "slash_command".
+func (e Event) IsSlashCommand() bool {
+	return e.Is(SlashCommand)
 }

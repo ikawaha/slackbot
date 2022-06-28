@@ -85,6 +85,37 @@ func (c *Client) PostMessage(ctx context.Context, channelID string, msg string) 
 	return &ret, nil
 }
 
+// RespondToCommand responds to the Slack command.
+func (c *Client) RespondToCommand(ctx context.Context, responseURL string, msg string, visible bool) error {
+	var responseType string
+	if visible {
+		responseType = "in_channel"
+	}
+	p, err := json.Marshal(map[string]string{
+		"response_type": responseType,
+		"text":          msg,
+	})
+	if err != nil {
+		return fmt.Errorf("request body marshal error: %w", err)
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, responseURL, bytes.NewReader(p))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := c.httpclient.Do(req)
+	if err != nil {
+		return fmt.Errorf("command response failed: %w", err)
+	}
+	defer resp.Body.Close()
+	io.Copy(io.Discard, resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("slack command response failed: %v, %q", resp.Status, string(p))
+	}
+	return nil
+}
+
 // UploadImage uploads an image by files.upload API.
 // see. https://api.slack.com/methods/files.upload
 func (c *Client) UploadImage(ctx context.Context, channels []string, title, fileName, fileType, comment string, img io.Reader) error {
