@@ -177,12 +177,12 @@ func (c *Client) processEnvelope(ctx context.Context, el *Envelope) (*Event, err
 	case SlashCommands:
 		return newSlashCommandEvent(&el.Payload), nil
 	case Disconnect:
-		log.Printf("refresh: event_type: %s, %q", el.Type, el.Payload)
+		log.Printf("refresh: event_type: %s, %#+v", el.Type, el.Payload)
 		return nil, c.reconnect(ctx)
 	case Hello:
 		log.Println("event_type: hello, client has successfully connected to the server")
 	default:
-		log.Printf("skip: event_type: %s, payload: %q", el.Type, el.Payload)
+		log.Printf("skip: event_type: %s, payload: %#+v", el.Type, el.Payload)
 	}
 	return nil, nil
 }
