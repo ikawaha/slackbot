@@ -28,7 +28,7 @@ type (
 )
 
 // New creates a slack bot from app-level token and API token.
-func New(appLevelToken, apiToken, botName string, opts ...Option) (*Client, error) {
+func New(appLevelToken, apiToken string, opts ...Option) (*Client, error) {
 	var c config
 	for _, opt := range opts {
 		if err := opt(&c); err != nil {
@@ -40,19 +40,21 @@ func New(appLevelToken, apiToken, botName string, opts ...Option) (*Client, erro
 	if err != nil {
 		return nil, err
 	}
-	id := a.UserID(botName)
-	if id == "" {
-		return nil, fmt.Errorf("bot-name not found: %s", botName)
-	}
 	s, err := socketmode.New(appLevelToken, c.socketModeClientOptions...)
 	if err != nil {
 		return nil, err
 	}
 	ret := Client{
-		Name:             botName,
-		ID:               id,
 		webAPIClient:     a,
 		socketModeClient: s,
+	}
+	if c.searchBotID {
+		id := a.UserID(c.botName)
+		if id == "" {
+			return nil, fmt.Errorf("bot-name not found: %s", c.botName)
+		}
+		ret.Name = c.botName
+		ret.ID = id
 	}
 	return &ret, nil
 }
@@ -71,6 +73,11 @@ func (c Client) ReceiveMessage(ctx context.Context, handler func(ctx context.Con
 func (c Client) PostMessage(ctx context.Context, channelID, msg string) error {
 	_, err := c.webAPIClient.PostMessage(ctx, channelID, msg)
 	return err
+}
+
+// RespondToCommand responds to the Slack command.
+func (c Client) RespondToCommand(ctx context.Context, responseURL string, msg string, visible bool) error {
+	return c.webAPIClient.RespondToCommand(ctx, responseURL, msg, visible)
 }
 
 // PlainMessageText resolves meta tags of the message text and return it.

@@ -40,7 +40,7 @@ type Bot struct {
 
 // NewBot creates a Slack bot.
 func NewBot(appToken, botToken, botName string) (*Bot, error) {
-  c, err := slackbot.New(appToken, botToken, botName)
+  c, err := slackbot.New(appToken, botToken, slackbot.SetBotID(botName), slackbot.Debug())
   if err != nil {
     return nil, err
   }
@@ -63,20 +63,24 @@ func main() {
   callPrefix := "<@" + bot.ID + ">"
   for {
     if err := bot.ReceiveMessage(context.TODO(), func(ctx context.Context, e *slackbot.Event) error {
-      log.Printf("-->%#+v", e)
-      if !e.IsMessage() {
-        return nil
-      }
-      u, ok := bot.User(e.UserID)
-      if !ok || u.IsBot {
-        return nil
-      }
-      if !strings.HasPrefix(e.Text, callPrefix) {
-        return nil
-      }
-      msg := "Hi, " + u.Name + ": " + strings.TrimPrefix(e.Text, callPrefix)
-      if err := bot.PostMessage(ctx, e.Channel, msg); err != nil {
-        return err
+      switch slackbot.EventType(e.Type) {
+      case slackbot.Message:
+        u, ok := bot.User(e.UserID)
+        log.Printf("!!! user: %+v", u)
+        if !ok || u.IsBot {
+          return nil
+        }
+        if !strings.HasPrefix(e.Text, callPrefix) {
+          return nil
+        }
+        msg := "Hi, " + u.Name + ": " + strings.TrimPrefix(e.Text, callPrefix)
+        if err := bot.PostMessage(ctx, e.Channel, msg); err != nil {
+          return err
+        }
+      case slackbot.SlashCommand:
+        if err := bot.RespondToCommand(ctx, e.ResponseURL, e.Text, true); err != nil {
+          return err
+        }
       }
       return nil
     }); err != nil {
