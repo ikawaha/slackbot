@@ -8,13 +8,17 @@ Tiny Slack bot client using the web socket mode.
 
 see. https://api.slack.com/apis/connections/socket
 
-* app-level token
-* bot token
-    * app-mention:read
+The required tokens and permissions are:
+* app-level token (enable socket mode)
+    *subscribe to bot events
+        *message.channels
+*bot token
     * channels:history
-    * im:history
+    * channels:join
     * chat:write
-    * users:read     
+    * files:write
+    * users:read
+
 
 # Interface
 
