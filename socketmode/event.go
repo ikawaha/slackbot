@@ -28,7 +28,7 @@ const (
 type Envelope struct {
 	Type                   string          `json:"type"`
 	EnvelopeID             string          `json:"envelope_id"`
-	Payload                EventPayload    `json:"payload"`
+	Payload                json.RawMessage `json:"payload"`
 	AcceptsResponsePayload bool            `json:"accepts_response_payload"`
 	RetryAttempt           int             `json:"retry_attempt"`
 	RetryReason            string          `json:"retry_reason"`
@@ -54,6 +54,8 @@ type EventPayload struct {
 	UserID      string `json:"user_id"`
 	Text        string `json:"text"`
 	UserName    string `json:"user_name"`
+	ChannelID   string `json:"channel_id"`
+	ChannelName string `json:"channel_name"`
 	ResponseURL string `json:"response_url"`
 	TriggerID   string `json:"trigger_id"`
 }
